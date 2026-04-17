@@ -1,8 +1,10 @@
 FROM php:8.5-alpine
 
 RUN apk add --no-cache git unzip tini \
+    && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS linux-headers \
     && docker-php-ext-install pcntl sockets \
-    && rm -rf /var/cache/apk/*
+    && apk del .build-deps \
+    && rm -rf /var/cache/apk/* /tmp/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 RUN adduser -D -u 100 -g 101 reverb
