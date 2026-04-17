@@ -7,7 +7,7 @@ RUN apk add --no-cache git unzip tini \
     && rm -rf /var/cache/apk/* /tmp/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-RUN adduser -D -u 100 -g 101 reverb
+RUN addgroup -g 1000 reverb && adduser -D -u 1000 -G reverb reverb
 
 WORKDIR /app
 RUN composer create-project laravel/laravel:^13.0 . --prefer-dist --no-dev --no-interaction \
