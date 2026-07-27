@@ -3,6 +3,8 @@ FROM php:8.5-alpine
 RUN apk add --no-cache git unzip tini \
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS linux-headers \
     && docker-php-ext-install pcntl sockets \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
     && apk del .build-deps \
     && rm -rf /var/cache/apk/* /tmp/*
 

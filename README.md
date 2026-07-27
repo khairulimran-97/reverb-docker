@@ -51,6 +51,39 @@ Create the PAT with `read:packages` scope.
 | `REVERB_PORT` | No | `8080` | Bind port inside the container |
 | `REVERB_SCHEME` | No | `https` | `http` locally, `https` behind TLS |
 | `BROADCAST_CONNECTION` | No | `reverb` | |
+| `REVERB_SCALING_ENABLED` | No | `false` | Set `true` to run **several containers** behind one domain |
+| `REDIS_HOST` | If scaling | — | Required when scaling is enabled |
+| `REDIS_PORT` | No | `6379` | |
+| `REDIS_PASSWORD` | No | — | |
+| `REDIS_CLIENT` | No | `phpredis` | The extension is built in |
+| `REVERB_SCALING_CHANNEL` | No | `reverb` | Must match across all containers |
+
+## Running several containers
+
+One container needs nothing extra. To run several behind the same domain they
+must share a Redis backplane, or each keeps its own connection state and clients
+silently miss events broadcast through a different one.
+
+```yaml
+x-reverb: &reverb
+  image: ghcr.io/khairulimran-97/reverb:1.1
+  environment:
+    REVERB_APP_ID: my-app
+    REVERB_APP_KEY: ...
+    REVERB_APP_SECRET: ...
+    REVERB_SCALING_ENABLED: "true"
+    REDIS_HOST: redis
+    REDIS_PASSWORD: ...
+
+services:
+  reverb-1: { <<: *reverb, container_name: reverb-1 }
+  reverb-2: { <<: *reverb, container_name: reverb-2 }
+  reverb-3: { <<: *reverb, container_name: reverb-3 }
+```
+
+With scaling enabled the container pings Redis at startup and **exits** if it is
+unreachable — a misconfigured backplane otherwise looks healthy while dropping
+cross-instance events.
 
 Your Laravel *application* should use the public-facing values:
 
