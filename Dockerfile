@@ -12,8 +12,9 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 RUN addgroup -g 1000 reverb && adduser -D -u 1000 -G reverb reverb
 
 WORKDIR /app
+# -W: reverb still requires guzzlehttp/psr7 ^2 while the skeleton now locks psr7 3 (guzzle 8)
 RUN composer create-project laravel/laravel:^13.0 . --prefer-dist --no-dev --no-interaction \
-    && composer require laravel/reverb:^1.7 --no-interaction \
+    && composer require laravel/reverb:^1.7 -W --no-interaction \
     && composer clear-cache \
     && chown -R reverb:reverb /app
 
